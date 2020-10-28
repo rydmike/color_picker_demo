@@ -177,6 +177,9 @@ linter:
     # return, but that return is still complex enough that a "body" is worth it.
     prefer_expression_function_bodies: false
 
+    # Not necessary for examples
+    public_member_api_docs: false
+
     # Incompatible with `prefer_final_locals`
     # Having immutable local variables makes larger functions more predictable
     # so we use `prefer_final_locals` instead.

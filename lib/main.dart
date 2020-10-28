@@ -26,7 +26,7 @@ class DemoApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Material Color Picker',
+      title: 'ColorPicker Demo',
       theme: ThemeData(
         primarySwatch: Colors.indigo,
         scaffoldBackgroundColor: Colors.grey[50],
@@ -322,7 +322,7 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
         elevation: 1,
         centerTitle: true,
         title: const Text(
-          'Color Picker Web Demo',
+          'ColorPicker Demo',
           style: TextStyle(color: Colors.black),
         ),
       ),
