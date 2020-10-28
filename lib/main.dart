@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:color_picker/color_picker.dart';
 
-/// More extensive demo of the ColorPicker, also published as a live web demo
-/// here: https://rydmike.com/democolorpicker
-//
+// More extensive demo of the ColorPicker, also published as a live web demo
+// here: https://rydmike.com/democolorpicker
 void main() => runApp(const DemoApp());
+
+// Just a simple way to leave a trace of what version you built a Flutter
+// Web demo with inside the app. You can also show it in the demo,
+// like in this example, so people testing it don't have to ask.
+const String kFlutterVersion = 'Channel master, 1.24.0-4.0.pre.58';
 
 class DemoApp extends StatelessWidget {
   const DemoApp({Key key}) : super(key: key);
@@ -71,11 +75,12 @@ class _HomeScreenState extends State<HomeScreen> {
           // This spacing adds back the top safe area that we loose with
           // extendBodyBehindAppBar = true
           SizedBox(height: MediaQuery.of(context).padding.top),
+          const Spacer(),
           Text(
             'COLOR PICKER',
             style: Theme.of(context).textTheme.headline5,
           ),
-          const SizedBox(height: 62),
+          const SizedBox(height: 30),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -173,6 +178,12 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: const Text('Try the color picker '),
           ),
+          const Spacer(),
+          Text(
+            'Built with Flutter $kFlutterVersion',
+            style: Theme.of(context).textTheme.caption,
+          ),
+          const SizedBox(height: 10),
         ],
       ),
     );
