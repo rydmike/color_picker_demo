@@ -22,8 +22,8 @@ flutter:
   uses-material-design: true
 
   fonts:
-    # While Roboto is included in Android Flutter, it is not available on all platforms
-    # to ensure that we get the actual Roboto font on all platform we include it as an asset.
+    # While Roboto is included in Android Flutter, it is not available on all platforms by default.
+    # To ensure that we get the actual Roboto font on all platform we include it as an asset.
     - family: Roboto
       fonts:
         - asset: assets/fonts/Roboto/Roboto-Thin.ttf

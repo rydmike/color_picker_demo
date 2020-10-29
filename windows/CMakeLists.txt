@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(color_picker_demo LANGUAGES CXX)
 
-set(BINARY_NAME "color_picker_demo")
+set(BINARY_NAME "ColorPicker")
 
 cmake_policy(SET CMP0063 NEW)
 
