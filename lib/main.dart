@@ -270,12 +270,9 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
     ),
   ];
 
-  final List<bool> _toggleButtonIsSelected = swatchAvailable.values.toList();
+  final List<bool> toggleButtonIsSelected = swatchAvailable.values.toList();
 
-  // Define some custom colors, that we will convert to ColorSwatch:es
-  // and set in a list. The first ones below are by the way the new colors
-  // Google used in the Material spec as default colors here:
-  // URL to be added here...
+  // Define some custom colors to be used in the custom segment.
   static const Color googleNewPrimary = Color(0xFF6200EE);
   static const Color googleNewPrimaryVariant = Color(0xFF3700B3);
   static const Color googleNewSecondary = Color(0xFF03DAC6);
@@ -294,7 +291,7 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
   static const Color blueJean = Color(0xFF4f75b8);
   static const Color deepBlueSea = Color(0xFF132b80);
 
-  // Make a custom color swatch to name map from the above custom colors
+  // Make a custom color swatch to name map from the above custom colors.
   final Map<ColorSwatch<Object>, String> colorsNameMap =
       <ColorSwatch<Object>, String>{
     ColorTools.createPrimaryColor(googleNewPrimary): 'G Purple',
@@ -479,58 +476,58 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                               // ToggleButtons is cool, you can do custom
                               // toggle logic
                               setState(() {
-                                _toggleButtonIsSelected[index] =
-                                    !_toggleButtonIsSelected[index];
+                                toggleButtonIsSelected[index] =
+                                    !toggleButtonIsSelected[index];
                                 if (index == 0) {
                                   swatchAvailable[ColorPickerSwatch.both] =
-                                      _toggleButtonIsSelected[index];
+                                      toggleButtonIsSelected[index];
                                   // If 'Both' is on then Material and Accent are off
                                   if (swatchAvailable[ColorPickerSwatch.both]) {
-                                    _toggleButtonIsSelected[1] = false;
+                                    toggleButtonIsSelected[1] = false;
                                     swatchAvailable[
                                         ColorPickerSwatch.material] = false;
-                                    _toggleButtonIsSelected[2] = false;
+                                    toggleButtonIsSelected[2] = false;
                                     swatchAvailable[ColorPickerSwatch.accent] =
                                         false;
                                   }
                                 }
                                 if (index == 1) {
                                   swatchAvailable[ColorPickerSwatch.material] =
-                                      _toggleButtonIsSelected[index];
+                                      toggleButtonIsSelected[index];
                                   // If we turned on 'Material', we turn of 'Both'
                                   if (swatchAvailable[
                                       ColorPickerSwatch.material]) {
-                                    _toggleButtonIsSelected[0] = false;
+                                    toggleButtonIsSelected[0] = false;
                                     swatchAvailable[ColorPickerSwatch.both] =
                                         false;
                                   }
                                 }
                                 if (index == 2) {
                                   swatchAvailable[ColorPickerSwatch.accent] =
-                                      _toggleButtonIsSelected[index];
+                                      toggleButtonIsSelected[index];
                                   // If we turned on 'Material', we turn of 'Both'
                                   if (swatchAvailable[
                                       ColorPickerSwatch.accent]) {
-                                    _toggleButtonIsSelected[0] = false;
+                                    toggleButtonIsSelected[0] = false;
                                     swatchAvailable[ColorPickerSwatch.both] =
                                         false;
                                   }
                                 }
                                 if (index == 3) {
                                   swatchAvailable[ColorPickerSwatch.bw] =
-                                      _toggleButtonIsSelected[index];
+                                      toggleButtonIsSelected[index];
                                 }
                                 if (index == 4) {
                                   swatchAvailable[ColorPickerSwatch.custom] =
-                                      _toggleButtonIsSelected[index];
+                                      toggleButtonIsSelected[index];
                                 }
                                 if (index == 5) {
                                   swatchAvailable[ColorPickerSwatch.any] =
-                                      _toggleButtonIsSelected[index];
+                                      toggleButtonIsSelected[index];
                                 }
                               });
                             },
-                            isSelected: _toggleButtonIsSelected,
+                            isSelected: toggleButtonIsSelected,
                             color: Theme.of(context).primaryColorDark,
                             fillColor: Theme.of(context).primaryColorDark,
                             selectedColor: Theme.of(context).primaryColorLight,
