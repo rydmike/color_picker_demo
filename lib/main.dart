@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:color_picker/color_picker.dart';
+import 'package:flex_color_picker/color_picker.dart';
 
 // Just a simple way to leave a trace of what version you built a Flutter
 // Web demo with inside the app. You can also show it in the demo,
 // like in this example, so people testing it don't have to ask.
-const String kFlutterVersion = 'master 1.24.0-4.0.pre.138';
+const String kFlutterVersion = 'master, 1.24.0-6.0.pre';
 
 // Max width of the body content when used on a wide screen.
 const double kMaxBodyWidth = 700;
@@ -75,8 +75,6 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          // This spacing adds back the top safe area that we loose with
-          // extendBodyBehindAppBar = true
           SizedBox(height: MediaQuery.of(context).padding.top),
           const Spacer(),
           Text(
@@ -201,13 +199,13 @@ class ColorPickerPage extends StatefulWidget {
 }
 
 class _ColorPickerPageState extends State<ColorPickerPage> {
-  bool selectShadeColors = true;
-  bool showColorName = true;
-  bool useBorder = false;
-  bool useBorderWheel = false;
+  bool enableShadesSelection = true;
+  bool showColorNameCode = true;
+  bool hasBorder = false;
+  bool wheelHasBorder = false;
   bool centerContent = true;
   bool showHeading = true;
-  bool showSubHeading = true;
+  bool showSubheading = true;
   bool includeIndex850 = false;
 
   final double sizeMin = 20;
@@ -220,20 +218,19 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
   double spacing = 4;
   double runSpacing = 4;
   double padding = 10;
-  double wheelSize = 190;
+  double wheelDiameter = 190;
   double wheelWidth = 16;
 
   Color screenPickerColor;
   Color dialogPickerColor;
 
-  static final Map<ColorPickerSwatch, bool> swatchAvailable =
-      <ColorPickerSwatch, bool>{
-    ColorPickerSwatch.both: false,
-    ColorPickerSwatch.material: true,
-    ColorPickerSwatch.accent: true,
-    ColorPickerSwatch.bw: false,
-    ColorPickerSwatch.custom: true,
-    ColorPickerSwatch.any: true,
+  static Map<ColorPickerType, bool> pickersEnabled = <ColorPickerType, bool>{
+    ColorPickerType.both: false,
+    ColorPickerType.primary: true,
+    ColorPickerType.accent: true,
+    ColorPickerType.bw: false,
+    ColorPickerType.custom: true,
+    ColorPickerType.wheel: true,
   };
 
   static const double kTogglePadding = 7;
@@ -266,11 +263,11 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
     ),
     const Padding(
       padding: EdgeInsets.fromLTRB(kTogglePadding, 0, kTogglePadding, 0),
-      child: Text('Any\ncolor', style: TextStyle(fontSize: kToggleFontSize)),
+      child: Text('Wheel', style: TextStyle(fontSize: kToggleFontSize)),
     ),
   ];
 
-  final List<bool> toggleButtonIsSelected = swatchAvailable.values.toList();
+  final List<bool> toggleButtonIsSelected = pickersEnabled.values.toList();
 
   // Define some custom colors to be used in the custom segment.
   static const Color googleNewPrimary = Color(0xFF6200EE);
@@ -363,18 +360,19 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                           color: screenPickerColor,
                           onColorChanged: (Color color) =>
                               setState(() => screenPickerColor = color),
-                          selectShades: selectShadeColors,
+                          enableShadesSelection: enableShadesSelection,
                           includeIndex850: includeIndex850,
-                          showNameSelected: showColorName,
+                          showColorNameCode: showColorNameCode,
                           crossAxisAlignment: centerContent
                               ? CrossAxisAlignment.center
                               : CrossAxisAlignment.start,
-                          size: size,
+                          width: size,
+                          height: size,
                           borderRadius: borderRadius,
-                          hasBorder: useBorder,
-                          hasWheelBorder: useBorderWheel,
+                          hasBorder: hasBorder,
+                          wheelHasBorder: wheelHasBorder,
                           elevation: elevation,
-                          padding: padding,
+                          padding: EdgeInsets.all(padding),
                           spacing: spacing,
                           runSpacing: runSpacing,
                           heading: showHeading
@@ -383,22 +381,22 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                                   style: Theme.of(context).textTheme.subtitle1,
                                 )
                               : null,
-                          subHeading: showSubHeading
+                          subheading: showSubheading
                               ? Text(
                                   'Select color shade',
                                   style: Theme.of(context).textTheme.subtitle1,
                                 )
                               : null,
-                          subWheelHeading: showSubHeading
+                          wheelSubheading: showSubheading
                               ? Text(
                                   'Selected color and its material shades',
                                   style: Theme.of(context).textTheme.subtitle1,
                                 )
                               : null,
-                          swatchAvailable: swatchAvailable,
+                          pickersEnabled: pickersEnabled,
                           // The name map is used to give the custom colors names
-                          colorSwatchNameMap: colorsNameMap,
-                          wheelSize: wheelSize,
+                          customColorSwatchesAndNames: colorsNameMap,
+                          wheelDiameter: wheelDiameter,
                           wheelWidth: wheelWidth,
                         ),
                       ),
@@ -421,7 +419,7 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                       borderRadius: borderRadius,
                       elevation: elevation,
                       color: screenPickerColor,
-                      hasBorder: useBorder,
+                      hasBorder: hasBorder,
                     ),
                   ),
 
@@ -441,12 +439,12 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                       borderRadius: borderRadius,
                       elevation: elevation,
                       color: dialogPickerColor,
-                      hasBorder: useBorder,
+                      hasBorder: hasBorder,
                       onSelect: () async {
-                        final Color _colorBeforeDialog = dialogPickerColor;
+                        final Color colorBeforeDialog = dialogPickerColor;
                         if (!(await colorPickerDialog())) {
                           setState(() {
-                            dialogPickerColor = _colorBeforeDialog;
+                            dialogPickerColor = colorBeforeDialog;
                           });
                         }
                       },
@@ -464,8 +462,7 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                   ),
 
                   ListTile(
-                    title: const Text(
-                        'Select colors swatches to use in the picker'),
+                    title: const Text('Select enabled pickers'),
                     subtitle: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
@@ -473,66 +470,79 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                           padding: const EdgeInsets.only(top: 8),
                           child: ToggleButtons(
                             onPressed: (int index) {
-                              // ToggleButtons is cool, you can do custom
-                              // toggle logic
+                              // Copy the currently enabled pickers map.
+                              final Map<ColorPickerType, bool> pEnabled =
+                                  <ColorPickerType, bool>{...pickersEnabled};
+                              // Set enabled pickers based on toggle buttons
+                              // custom logic by mutating the copy of enabled
+                              // pickers.
+                              toggleButtonIsSelected[index] =
+                                  !toggleButtonIsSelected[index];
+                              if (index == 0) {
+                                pEnabled[ColorPickerType.both] =
+                                    toggleButtonIsSelected[index];
+                                // If 'Both' on then primary & Accent are off
+                                if (pEnabled[ColorPickerType.both]) {
+                                  toggleButtonIsSelected[1] = false;
+                                  pEnabled[ColorPickerType.primary] = false;
+                                  toggleButtonIsSelected[2] = false;
+                                  pEnabled[ColorPickerType.accent] = false;
+                                }
+                              }
+                              if (index == 1) {
+                                pEnabled[ColorPickerType.primary] =
+                                    toggleButtonIsSelected[index];
+                                // If we turned on 'primary', we turn of 'Both'
+                                if (pEnabled[ColorPickerType.primary]) {
+                                  toggleButtonIsSelected[0] = false;
+                                  pEnabled[ColorPickerType.both] = false;
+                                }
+                              }
+                              if (index == 2) {
+                                pEnabled[ColorPickerType.accent] =
+                                    toggleButtonIsSelected[index];
+                                // If we turned on 'accent', we turn of 'Both'
+                                if (pEnabled[ColorPickerType.accent]) {
+                                  toggleButtonIsSelected[0] = false;
+                                  pEnabled[ColorPickerType.both] = false;
+                                }
+                              }
+                              if (index == 3) {
+                                pEnabled[ColorPickerType.bw] =
+                                    toggleButtonIsSelected[index];
+                              }
+                              if (index == 4) {
+                                pEnabled[ColorPickerType.custom] =
+                                    toggleButtonIsSelected[index];
+                              }
+                              if (index == 5) {
+                                pEnabled[ColorPickerType.wheel] =
+                                    toggleButtonIsSelected[index];
+                              }
                               setState(() {
-                                toggleButtonIsSelected[index] =
-                                    !toggleButtonIsSelected[index];
-                                if (index == 0) {
-                                  swatchAvailable[ColorPickerSwatch.both] =
-                                      toggleButtonIsSelected[index];
-                                  // If 'Both' is on then Material and Accent are off
-                                  if (swatchAvailable[ColorPickerSwatch.both]) {
-                                    toggleButtonIsSelected[1] = false;
-                                    swatchAvailable[
-                                        ColorPickerSwatch.material] = false;
-                                    toggleButtonIsSelected[2] = false;
-                                    swatchAvailable[ColorPickerSwatch.accent] =
-                                        false;
-                                  }
-                                }
-                                if (index == 1) {
-                                  swatchAvailable[ColorPickerSwatch.material] =
-                                      toggleButtonIsSelected[index];
-                                  // If we turned on 'Material', we turn of 'Both'
-                                  if (swatchAvailable[
-                                      ColorPickerSwatch.material]) {
-                                    toggleButtonIsSelected[0] = false;
-                                    swatchAvailable[ColorPickerSwatch.both] =
-                                        false;
-                                  }
-                                }
-                                if (index == 2) {
-                                  swatchAvailable[ColorPickerSwatch.accent] =
-                                      toggleButtonIsSelected[index];
-                                  // If we turned on 'Material', we turn of 'Both'
-                                  if (swatchAvailable[
-                                      ColorPickerSwatch.accent]) {
-                                    toggleButtonIsSelected[0] = false;
-                                    swatchAvailable[ColorPickerSwatch.both] =
-                                        false;
-                                  }
-                                }
-                                if (index == 3) {
-                                  swatchAvailable[ColorPickerSwatch.bw] =
-                                      toggleButtonIsSelected[index];
-                                }
-                                if (index == 4) {
-                                  swatchAvailable[ColorPickerSwatch.custom] =
-                                      toggleButtonIsSelected[index];
-                                }
-                                if (index == 5) {
-                                  swatchAvailable[ColorPickerSwatch.any] =
-                                      toggleButtonIsSelected[index];
-                                }
+                                // Copy the enabled pickers from the mutated
+                                // copy. If we mutate the pickersEnabled map
+                                // directly the didUpdateWidget will be called,
+                                // but the old and new values will be same
+                                // since we mutated the widget input. Doing it
+                                // this way, the didUpdateWidget function of the
+                                // StatefulWidget sees the changed values of
+                                // pickersEnabled. We need that for dynamically
+                                // changing the enabled pickers correctly.
+                                // Normally you would just define the pickers
+                                // you want when you instantiate it and not
+                                // change it, so you would not need to do this.
+                                pickersEnabled = <ColorPickerType, bool>{
+                                  ...pEnabled
+                                };
                               });
                             },
                             isSelected: toggleButtonIsSelected,
                             color: Theme.of(context).primaryColorDark,
                             fillColor: Theme.of(context).primaryColorDark,
                             selectedColor: Theme.of(context).primaryColorLight,
-                            borderRadius: BorderRadius.circular(10),
-                            borderWidth: 2,
+                            borderRadius: BorderRadius.circular(4),
+                            borderWidth: 1,
                             borderColor: Theme.of(context).primaryColor,
                             selectedBorderColor: Theme.of(context).primaryColor,
                             hoverColor: Theme.of(context).primaryColorLight,
@@ -549,9 +559,9 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                     subtitle: const Text(
                         'If this is off, you can only select the main '
                         'color in a color swatch'),
-                    value: selectShadeColors,
+                    value: enableShadesSelection,
                     onChanged: (bool value) =>
-                        setState(() => selectShadeColors = value),
+                        setState(() => enableShadesSelection = value),
                   ),
 
                   SwitchListTile.adaptive(
@@ -577,9 +587,9 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                     subtitle: const Text(
                         'If color has a material name it is shown along '
                         'with shade index and Flutter HEX code'),
-                    value: showColorName,
+                    value: showColorNameCode,
                     onChanged: (bool value) =>
-                        setState(() => showColorName = value),
+                        setState(() => showColorNameCode = value),
                   ),
 
                   SwitchListTile.adaptive(
@@ -597,27 +607,27 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                     subtitle: const Text(
                         'You can provide your own sub heading widget, if '
                         'it is null there is no sub heading'),
-                    value: showSubHeading,
+                    value: showSubheading,
                     onChanged: (bool value) =>
-                        setState(() => showSubHeading = value),
+                        setState(() => showSubheading = value),
                   ),
 
                   SwitchListTile.adaptive(
                     title: const Text('Border around color pick items'),
                     subtitle: const Text('With the API you can also adjust the '
                         'border color'),
-                    value: useBorder,
+                    value: hasBorder,
                     onChanged: (bool value) =>
-                        setState(() => useBorder = value),
+                        setState(() => hasBorder = value),
                   ),
 
                   SwitchListTile.adaptive(
                     title: const Text('Border around color wheel'),
                     subtitle: const Text('With the API you can also adjust the '
                         'border color'),
-                    value: useBorderWheel,
+                    value: wheelHasBorder,
                     onChanged: (bool value) =>
-                        setState(() => useBorderWheel = value),
+                        setState(() => wheelHasBorder = value),
                   ),
 
                   // Color picker size
@@ -839,10 +849,10 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                           min: 150,
                           max: 500,
                           divisions: 40,
-                          label: wheelSize.floor().toString(),
-                          value: wheelSize,
+                          label: wheelDiameter.floor().toString(),
+                          value: wheelDiameter,
                           onChanged: (double value) =>
-                              setState(() => wheelSize = value),
+                              setState(() => wheelDiameter = value),
                         ),
                       ],
                     ),
@@ -856,7 +866,7 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                             style: TextStyle(fontSize: 11),
                           ),
                           Text(
-                            wheelSize.floor().toString(),
+                            wheelDiameter.floor().toString(),
                             style: const TextStyle(fontSize: 15),
                           ),
                         ],
@@ -911,17 +921,18 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
       color: dialogPickerColor,
       onColorChanged: (Color color) =>
           setState(() => dialogPickerColor = color),
-      selectShades: selectShadeColors,
+      enableShadesSelection: enableShadesSelection,
       includeIndex850: includeIndex850,
-      showNameSelected: showColorName,
+      showColorNameCode: showColorNameCode,
       crossAxisAlignment:
           centerContent ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-      size: size,
+      width: size,
+      height: size,
       borderRadius: borderRadius,
-      hasBorder: useBorder,
-      hasWheelBorder: useBorderWheel,
+      hasBorder: hasBorder,
+      wheelHasBorder: wheelHasBorder,
       elevation: elevation,
-      padding: padding,
+      padding: EdgeInsets.all(padding),
       spacing: spacing,
       runSpacing: runSpacing,
       heading: showHeading
@@ -930,21 +941,21 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
               style: Theme.of(context).textTheme.subtitle1,
             )
           : null,
-      subHeading: showSubHeading
+      subheading: showSubheading
           ? Text(
               'Select color shade',
               style: Theme.of(context).textTheme.subtitle1,
             )
           : null,
-      subWheelHeading: showSubHeading
+      wheelSubheading: showSubheading
           ? Text(
               'Selected color and its material shades',
               style: Theme.of(context).textTheme.subtitle1,
             )
           : null,
-      swatchAvailable: swatchAvailable,
-      colorSwatchNameMap: colorsNameMap,
-      wheelSize: wheelSize,
+      pickersEnabled: pickersEnabled,
+      customColorSwatchesAndNames: colorsNameMap,
+      wheelDiameter: wheelDiameter,
       wheelWidth: wheelWidth,
     ).showPickerDialog(
       context,
