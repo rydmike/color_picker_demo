@@ -5,7 +5,7 @@ import 'package:flex_color_picker/flex_color_picker.dart';
 // Just a simple way to leave a trace of what version you built a Flutter
 // Web demo with inside the app. You can also show it in the demo,
 // like in this example, so people testing it don't have to ask.
-const String kFlutterVersion = 'master, 1.24.0-8.0.pre.91';
+const String kFlutterVersion = 'master 1.24.0-8.0.pre.97';
 
 // Max width of the body content when used on a wide screen.
 const double kMaxBodyWidth = 700;
@@ -14,13 +14,26 @@ const double kMaxBodyWidth = 700;
 // here: https://rydmike.com/democolorpicker
 void main() => runApp(const DemoApp());
 
-class DemoApp extends StatelessWidget {
+class DemoApp extends StatefulWidget {
   const DemoApp({Key key}) : super(key: key);
+
+  @override
+  _DemoAppState createState() => _DemoAppState();
+}
+
+class _DemoAppState extends State<DemoApp> {
+  ThemeMode themeMode;
+
+  @override
+  void initState() {
+    themeMode = ThemeMode.light;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     // Make status bar transparent in Android, results in an iPhone like look
-    // when used in combination with the AppBar theme below.
+    // when used in combination with the AppBar theme further below.
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -33,40 +46,74 @@ class DemoApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'ColorPicker Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.indigo,
+      title: 'ColorPicker Web Demo',
+      //
+      // Make a light theme, based on well known blue brand colors.
+      theme: ThemeData.from(
+        colorScheme: const ColorScheme.light().copyWith(
+          primary: const Color(0xFF3B5998),
+          primaryVariant: const Color(0xFF3F729B),
+          secondary: const Color(0xFF55ACEE),
+          secondaryVariant: const Color(0xFFA2D1F6),
+        ),
+      ).copyWith(
         scaffoldBackgroundColor: const Color(0xFFFDFDFD),
-        // This AppBarTheme setup is part of emulating the light iPhone
-        // appbar look on both Android and iOS, when using Material AppBar
+        toggleableActiveColor: const Color(0xFF55ACEE),
         appBarTheme: AppBarTheme(
           brightness: Brightness.light,
-          // Using a barely transparent white appbar, it is not a frosted
-          // glass effect, but much cheaper to render than such a filter effect.
           color: Colors.white.withOpacity(0.9),
           iconTheme: const IconThemeData(color: Colors.black),
-          elevation: 0,
-        ),
-        // Make a prettier button theme that is based on same color as
-        // the primary color, otherwise buttons are grey.
-        buttonTheme: ButtonThemeData(
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.indigo),
-          textTheme: ButtonTextTheme.primary,
+          textTheme: Theme.of(context).textTheme,
+          elevation: 0.5,
         ),
       ),
-      home: const HomeScreen(),
+      //
+      // Make a dark theme, based on well known blue brand colors.
+      darkTheme: ThemeData.from(
+        colorScheme: const ColorScheme.dark().copyWith(
+          primary: const Color(0xFF8B9DC3),
+          primaryVariant: const Color(0xFF799CB9),
+          secondary: const Color(0xFFA0D1F5),
+          secondaryVariant: const Color(0xFF607D93),
+        ),
+      ).copyWith(
+        toggleableActiveColor: const Color(0xFFA0D1F5),
+        appBarTheme: AppBarTheme(
+          brightness: Brightness.dark,
+          color: Colors.black.withOpacity(0.9),
+          iconTheme: const IconThemeData(color: Colors.white),
+          elevation: 0.5,
+        ),
+      ),
+      themeMode: themeMode,
+      home: HomeScreen(
+        themeMode: (ThemeMode mode) {
+          setState(() {
+            themeMode = mode;
+          });
+        },
+      ),
     );
   }
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key key}) : super(key: key);
+  const HomeScreen({Key key, this.themeMode}) : super(key: key);
+  final ValueChanged<ThemeMode> themeMode;
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool isDark;
+
+  @override
+  void initState() {
+    isDark = false;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -168,8 +215,24 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 20),
+          // Theme mode toggle
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 270),
+            child: SwitchListTile.adaptive(
+              title: const Text('Turn ON for dark mode'),
+              subtitle: const Text('Turn OFF for light mode'),
+              value: isDark,
+              onChanged: (bool value) {
+                setState(() {
+                  isDark = value;
+                  widget.themeMode(isDark ? ThemeMode.dark : ThemeMode.light);
+                });
+              },
+            ),
+          ),
           const SizedBox(height: 40),
-          OutlineButton(
+          OutlinedButton(
             onPressed: () {
               Navigator.push<Object>(
                 context,
@@ -177,7 +240,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (BuildContext context) => const ColorPickerPage()),
               );
             },
-            child: const Text('Try the color picker '),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                'Try the color picker ',
+                style: Theme.of(context).textTheme.subtitle1,
+              ),
+            ),
           ),
           const Spacer(),
           Text(
@@ -235,38 +304,18 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
     ColorPickerType.wheel: true,
   };
 
-  static const double kTogglePadding = 7;
-  static const double kToggleFontSize = 10;
-
-  final List<Widget> toggleButtons = <Widget>[
-    const Padding(
-      padding: EdgeInsets.fromLTRB(kTogglePadding, 0, kTogglePadding, 0),
-      child: Text('Primary &\nAccent',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: kToggleFontSize)),
-    ),
-    const Padding(
-      padding: EdgeInsets.fromLTRB(kTogglePadding, 0, kTogglePadding, 0),
-      child: Text('Primary', style: TextStyle(fontSize: kToggleFontSize)),
-    ),
-    const Padding(
-      padding: EdgeInsets.fromLTRB(kTogglePadding, 0, kTogglePadding, 0),
-      child: Text('Accent', style: TextStyle(fontSize: kToggleFontSize)),
-    ),
-    const Padding(
-      padding: EdgeInsets.fromLTRB(kTogglePadding, 0, kTogglePadding, 0),
-      child: Text('Black &\nWhite',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: kToggleFontSize)),
-    ),
-    const Padding(
-      padding: EdgeInsets.fromLTRB(kTogglePadding, 0, kTogglePadding, 0),
-      child: Text('Custom ', style: TextStyle(fontSize: kToggleFontSize)),
-    ),
-    const Padding(
-      padding: EdgeInsets.fromLTRB(kTogglePadding, 0, kTogglePadding, 0),
-      child: Text('Wheel', style: TextStyle(fontSize: kToggleFontSize)),
-    ),
+  static const double kToggleFontSize = 11;
+  static const List<Widget> toggleButtons = <Widget>[
+    Text('Primary &\nAccent',
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: kToggleFontSize)),
+    Text('Primary', style: TextStyle(fontSize: kToggleFontSize)),
+    Text('Accent', style: TextStyle(fontSize: kToggleFontSize)),
+    Text('Black &\nWhite',
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: kToggleFontSize)),
+    Text('Custom ', style: TextStyle(fontSize: kToggleFontSize)),
+    Text('Wheel', style: TextStyle(fontSize: kToggleFontSize)),
   ];
 
   final List<bool> toggleButtonIsSelected = pickersEnabled.values.toList();
@@ -293,35 +342,31 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
   // Make a custom color swatch to name map from the above custom colors.
   final Map<ColorSwatch<Object>, String> colorsNameMap =
       <ColorSwatch<Object>, String>{
-    ColorTools.createPrimaryColor(guideNewPrimary): 'Guide Purple',
-    ColorTools.createPrimaryColor(guideNewPrimaryVariant):
+    ColorTools.createPrimarySwatch(guideNewPrimary): 'Guide Purple',
+    ColorTools.createPrimarySwatch(guideNewPrimaryVariant):
         'Guide Purple Variant',
-    ColorTools.createAccentColor(guideNewSecondary): 'Guide Teal',
-    ColorTools.createAccentColor(guideNewSecondaryVariant):
+    ColorTools.createAccentSwatch(guideNewSecondary): 'Guide Teal',
+    ColorTools.createAccentSwatch(guideNewSecondaryVariant):
         'Guide Teal Variant',
-    ColorTools.createPrimaryColor(guideNewError): 'Guide Error',
-    ColorTools.createPrimaryColor(guideNewErrorDark): 'Guide Error Dark',
-    ColorTools.createPrimaryColor(blueBlues): 'Blue blues',
-    ColorTools.createPrimaryColor(clearBlue): 'Clear blue',
-    ColorTools.createPrimaryColor(darkPink): 'Dark pink',
-    ColorTools.createPrimaryColor(redWine): 'Red wine',
-    ColorTools.createPrimaryColor(grassGreen): 'Grass green',
-    ColorTools.createPrimaryColor(moneyGreen): 'Money green',
-    ColorTools.createPrimaryColor(mandarinOrange): 'Mandarin orange',
-    ColorTools.createPrimaryColor(brightOrange): 'Bright orange',
-    ColorTools.createPrimaryColor(brightGreen): 'Bright green',
-    ColorTools.createPrimaryColor(blueJean): 'Washed jean blue',
-    ColorTools.createPrimaryColor(deepBlueSea): 'Deep blue sea',
+    ColorTools.createPrimarySwatch(guideNewError): 'Guide Error',
+    ColorTools.createPrimarySwatch(guideNewErrorDark): 'Guide Error Dark',
+    ColorTools.createPrimarySwatch(blueBlues): 'Blue blues',
+    ColorTools.createPrimarySwatch(clearBlue): 'Clear blue',
+    ColorTools.createPrimarySwatch(darkPink): 'Dark pink',
+    ColorTools.createPrimarySwatch(redWine): 'Red wine',
+    ColorTools.createPrimarySwatch(grassGreen): 'Grass green',
+    ColorTools.createPrimarySwatch(moneyGreen): 'Money green',
+    ColorTools.createPrimarySwatch(mandarinOrange): 'Mandarin orange',
+    ColorTools.createPrimarySwatch(brightOrange): 'Bright orange',
+    ColorTools.createPrimarySwatch(brightGreen): 'Bright green',
+    ColorTools.createPrimarySwatch(blueJean): 'Washed jean blue',
+    ColorTools.createPrimarySwatch(deepBlueSea): 'Deep blue sea',
   };
 
   @override
   void initState() {
-    // To get a color show up as selected by default when calling the picker
-    // start with a given color in a Swatch, not just with a Swatch, like
-    // Colors.blue or Colors.red, the color will not get pre-selected in the
-    // picker then.
-    screenPickerColor = Colors.blue[500];
-    dialogPickerColor = Colors.red[800];
+    screenPickerColor = Colors.blue;
+    dialogPickerColor = Colors.red;
     super.initState();
   }
 
@@ -331,605 +376,602 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
       extendBodyBehindAppBar: true,
       extendBody: true,
       appBar: AppBar(
-        elevation: 0.5,
         centerTitle: true,
-        title: const Text(
-          'ColorPicker Demo',
-          style: TextStyle(color: Colors.black),
-        ),
+        title: const Text('ColorPicker Web Demo'),
       ),
       body: Scrollbar(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: kMaxBodyWidth),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  // This spacing adds back the top safe area that we loose with
-                  // extendBodyBehindAppBar = true and the AppBar, we will now
-                  // see the content that scroll behind the semi transparent appbar
-                  SizedBox(
-                      height:
-                          MediaQuery.of(context).padding.top + kToolbarHeight),
-                  // Color picker demo in a raised card
-                  SizedBox(
-                    width: double.infinity,
-                    child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Card(
-                        elevation: 1,
-                        child: ColorPicker(
-                          color: screenPickerColor,
-                          onColorChanged: (Color color) =>
-                              setState(() => screenPickerColor = color),
-                          enableShadesSelection: enableShadesSelection,
-                          includeIndex850: includeIndex850,
-                          showMaterialName: showMaterialName,
-                          showColorName: showColorName,
-                          showColorCode: showColorCode,
-                          crossAxisAlignment: centerContent
-                              ? CrossAxisAlignment.center
-                              : CrossAxisAlignment.start,
-                          width: size,
-                          height: size,
-                          borderRadius: borderRadius,
-                          hasBorder: hasBorder,
-                          wheelHasBorder: wheelHasBorder,
-                          elevation: elevation,
-                          padding: EdgeInsets.all(padding),
-                          spacing: spacing,
-                          runSpacing: runSpacing,
-                          heading: showHeading
-                              ? Text(
-                                  'Select color',
-                                  style: Theme.of(context).textTheme.subtitle1,
-                                )
-                              : null,
-                          subheading: showSubheading
-                              ? Text(
-                                  'Select color shade',
-                                  style: Theme.of(context).textTheme.subtitle1,
-                                )
-                              : null,
-                          wheelSubheading: showSubheading
-                              ? Text(
-                                  'Selected color and its material shades',
-                                  style: Theme.of(context).textTheme.subtitle1,
-                                )
-                              : null,
-                          pickersEnabled: pickersEnabled,
-                          // The name map is used to give the custom colors names
-                          customColorSwatchesAndNames: colorsNameMap,
-                          wheelDiameter: wheelDiameter,
-                          wheelWidth: wheelWidth,
-                        ),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: kMaxBodyWidth),
+            child: ListView(
+              // crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+              children: <Widget>[
+                // This spacing adds back the top safe area that we loose with
+                // extendBodyBehindAppBar = true and the AppBar, we will now
+                // see the content that scroll behind the semi transparent appbar
+                SizedBox(
+                    height:
+                        MediaQuery.of(context).padding.top + kToolbarHeight),
+                // Color picker demo in a raised card
+                SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Card(
+                      elevation: 2,
+                      child: ColorPicker(
+                        color: screenPickerColor,
+                        onColorChanged: (Color color) =>
+                            setState(() => screenPickerColor = color),
+                        crossAxisAlignment: centerContent
+                            ? CrossAxisAlignment.center
+                            : CrossAxisAlignment.start,
+                        padding: EdgeInsets.all(padding),
+                        enableShadesSelection: enableShadesSelection,
+                        includeIndex850: includeIndex850,
+                        width: size,
+                        height: size,
+                        spacing: spacing,
+                        runSpacing: runSpacing,
+                        elevation: elevation,
+                        hasBorder: hasBorder,
+                        borderRadius: borderRadius,
+                        wheelDiameter: wheelDiameter,
+                        wheelWidth: wheelWidth,
+                        wheelHasBorder: wheelHasBorder,
+                        pickersEnabled: pickersEnabled,
+                        heading: showHeading
+                            ? Text(
+                                'Select color',
+                                style: Theme.of(context).textTheme.subtitle1,
+                              )
+                            : null,
+                        subheading: showSubheading
+                            ? Text(
+                                'Select color shade',
+                                style: Theme.of(context).textTheme.subtitle1,
+                              )
+                            : null,
+                        wheelSubheading: showSubheading
+                            ? Text(
+                                'Selected color and its material shades',
+                                style: Theme.of(context).textTheme.subtitle1,
+                              )
+                            : null,
+                        showMaterialName: showMaterialName,
+                        showColorName: showColorName,
+                        showColorCode: showColorCode,
+                        // The name map is used to give the custom colors names
+                        customColorSwatchesAndNames: colorsNameMap,
                       ),
                     ),
                   ),
+                ),
 
-                  // Show the selected color
-                  ListTile(
-                    title:
-                        const Text('Select color above to change this color'),
-                    subtitle: Text(
-                        '${ColorTools.colorNameAndHexCode(screenPickerColor, colorSwatchNameMap: colorsNameMap)} '
-                        'aka ${ColorTools.nameThatColor(screenPickerColor)}'),
-                    trailing: ColorIndicator(
-                      height: size,
-                      width: size,
-                      borderRadius: borderRadius,
-                      elevation: elevation,
-                      color: screenPickerColor,
-                      hasBorder: hasBorder,
-                    ),
+                // Show the selected color
+                ListTile(
+                  title: const Text('Select color above to change this color'),
+                  subtitle: Text(
+                      '${ColorTools.materialNameAndCode(screenPickerColor, colorSwatchNameMap: colorsNameMap)} '
+                      'aka ${ColorTools.nameThatColor(screenPickerColor)}'),
+                  trailing: ColorIndicator(
+                    height: size,
+                    width: size,
+                    borderRadius: borderRadius,
+                    elevation: elevation,
+                    color: screenPickerColor,
+                    hasBorder: hasBorder,
                   ),
+                ),
 
-                  // Show the selected color
-                  ListTile(
-                    title:
-                        const Text('Click this color to change it in a dialog'),
-                    subtitle: Text(
-                      '${ColorTools.colorNameAndHexCode(dialogPickerColor, colorSwatchNameMap: colorsNameMap)} '
-                      'aka ${ColorTools.nameThatColor(dialogPickerColor)}',
-                    ),
-                    trailing: ColorIndicator(
-                      height: size,
-                      width: size,
-                      borderRadius: borderRadius,
-                      elevation: elevation,
-                      color: dialogPickerColor,
-                      hasBorder: hasBorder,
-                      onSelect: () async {
-                        final Color colorBeforeDialog = dialogPickerColor;
-                        if (!(await colorPickerDialog())) {
-                          setState(() {
-                            dialogPickerColor = colorBeforeDialog;
-                          });
-                        }
-                      },
-                    ),
+                // Show the selected color
+                ListTile(
+                  title:
+                      const Text('Click this color to change it in a dialog'),
+                  subtitle: Text(
+                    '${ColorTools.materialNameAndCode(dialogPickerColor, colorSwatchNameMap: colorsNameMap)} '
+                    'aka ${ColorTools.nameThatColor(dialogPickerColor)}',
                   ),
-
-                  const Divider(),
-
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 0, 14),
-                    child: Text(
-                      'Customize the Color Picker',
-                      style: Theme.of(context).textTheme.headline6,
-                    ),
+                  trailing: ColorIndicator(
+                    height: size,
+                    width: size,
+                    borderRadius: borderRadius,
+                    elevation: elevation,
+                    color: dialogPickerColor,
+                    hasBorder: hasBorder,
+                    onSelect: () async {
+                      final Color colorBeforeDialog = dialogPickerColor;
+                      if (!(await colorPickerDialog())) {
+                        setState(() {
+                          dialogPickerColor = colorBeforeDialog;
+                        });
+                      }
+                    },
                   ),
+                ),
 
-                  ListTile(
-                    title: const Text('Select enabled pickers'),
-                    subtitle: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: ToggleButtons(
-                            onPressed: (int index) {
-                              // Copy the currently enabled pickers map.
-                              final Map<ColorPickerType, bool> pEnabled =
-                                  <ColorPickerType, bool>{...pickersEnabled};
-                              // Set enabled pickers based on toggle buttons
-                              // custom logic by mutating the copy of enabled
-                              // pickers.
-                              toggleButtonIsSelected[index] =
-                                  !toggleButtonIsSelected[index];
-                              if (index == 0) {
-                                pEnabled[ColorPickerType.both] =
-                                    toggleButtonIsSelected[index];
-                                // If 'Both' on then primary & Accent are off
-                                if (pEnabled[ColorPickerType.both]) {
-                                  toggleButtonIsSelected[1] = false;
-                                  pEnabled[ColorPickerType.primary] = false;
-                                  toggleButtonIsSelected[2] = false;
-                                  pEnabled[ColorPickerType.accent] = false;
-                                }
+                const Divider(),
+
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 0, 14),
+                  child: Text(
+                    'Customize the Color Picker',
+                    style: Theme.of(context).textTheme.headline6,
+                  ),
+                ),
+
+                ListTile(
+                  title: const Text('Select enabled pickers'),
+                  subtitle: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: ToggleButtons(
+                          constraints:
+                              const BoxConstraints(minWidth: 60, minHeight: 45),
+                          // renderBorder: false,
+                          onPressed: (int index) {
+                            // Copy the currently enabled pickers map.
+                            final Map<ColorPickerType, bool> pEnabled =
+                                <ColorPickerType, bool>{...pickersEnabled};
+                            // Set enabled pickers based on toggle buttons
+                            // custom logic by mutating the copy of enabled
+                            // pickers.
+                            toggleButtonIsSelected[index] =
+                                !toggleButtonIsSelected[index];
+                            if (index == 0) {
+                              pEnabled[ColorPickerType.both] =
+                                  toggleButtonIsSelected[index];
+                              // If 'Both' on then primary & Accent are off
+                              if (pEnabled[ColorPickerType.both]) {
+                                toggleButtonIsSelected[1] = false;
+                                pEnabled[ColorPickerType.primary] = false;
+                                toggleButtonIsSelected[2] = false;
+                                pEnabled[ColorPickerType.accent] = false;
                               }
-                              if (index == 1) {
-                                pEnabled[ColorPickerType.primary] =
-                                    toggleButtonIsSelected[index];
-                                // If we turned on 'primary', we turn of 'Both'
-                                if (pEnabled[ColorPickerType.primary]) {
-                                  toggleButtonIsSelected[0] = false;
-                                  pEnabled[ColorPickerType.both] = false;
-                                }
-                              }
-                              if (index == 2) {
-                                pEnabled[ColorPickerType.accent] =
-                                    toggleButtonIsSelected[index];
-                                // If we turned on 'accent', we turn of 'Both'
-                                if (pEnabled[ColorPickerType.accent]) {
-                                  toggleButtonIsSelected[0] = false;
-                                  pEnabled[ColorPickerType.both] = false;
-                                }
-                              }
-                              if (index == 3) {
-                                pEnabled[ColorPickerType.bw] =
-                                    toggleButtonIsSelected[index];
-                              }
-                              if (index == 4) {
-                                pEnabled[ColorPickerType.custom] =
-                                    toggleButtonIsSelected[index];
-                              }
-                              if (index == 5) {
-                                pEnabled[ColorPickerType.wheel] =
-                                    toggleButtonIsSelected[index];
-                              }
-                              setState(() {
-                                // Copy the enabled pickers from the mutated
-                                // copy. If we mutate the pickersEnabled map
-                                // directly the didUpdateWidget will be called,
-                                // but the old and new values will be same
-                                // since we mutated the widget input. Doing it
-                                // this way, the didUpdateWidget function of the
-                                // StatefulWidget sees the changed values of
-                                // pickersEnabled. We need that for dynamically
-                                // changing the enabled pickers correctly.
-                                // Normally you would just define the pickers
-                                // you want when you instantiate it and not
-                                // change it, so you would not need to do this.
-                                pickersEnabled = <ColorPickerType, bool>{
-                                  ...pEnabled
-                                };
-                              });
-                            },
-                            isSelected: toggleButtonIsSelected,
-                            color: Theme.of(context).primaryColorDark,
-                            fillColor: Theme.of(context).primaryColorDark,
-                            selectedColor: Theme.of(context).primaryColorLight,
-                            borderRadius: BorderRadius.circular(4),
-                            borderWidth: 1,
-                            borderColor: Theme.of(context).primaryColor,
-                            selectedBorderColor: Theme.of(context).primaryColor,
-                            hoverColor: Theme.of(context).primaryColorLight,
-                            focusColor: Theme.of(context).primaryColorDark,
-                            children: toggleButtons,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SwitchListTile.adaptive(
-                    title: const Text('Enable shades selection'),
-                    subtitle: const Text(
-                        'If this is off, you can only select the main '
-                        'color in a color swatch'),
-                    value: enableShadesSelection,
-                    onChanged: (bool value) =>
-                        setState(() => enableShadesSelection = value),
-                  ),
-
-                  SwitchListTile.adaptive(
-                    title: const Text('Include grey color index 850'),
-                    subtitle: const Text(
-                        'To include the not so well known 850 color in '
-                        'the Grey swatch, turn on this'),
-                    value: includeIndex850,
-                    onChanged: (bool value) =>
-                        setState(() => includeIndex850 = value),
-                  ),
-
-                  SwitchListTile.adaptive(
-                    title: const Text('Center content'),
-                    subtitle: const Text('Keep OFF for left aligned'),
-                    value: centerContent,
-                    onChanged: (bool value) =>
-                        setState(() => centerContent = value),
-                  ),
-
-                  SwitchListTile.adaptive(
-                    title: const Text('Show selected material color name'),
-                    subtitle: const Text(
-                        'If the color has a Material name, it is shown along '
-                        'with its shade index'),
-                    value: showMaterialName,
-                    onChanged: (bool value) =>
-                        setState(() => showMaterialName = value),
-                  ),
-
-                  SwitchListTile.adaptive(
-                    title: const Text('Show selected color name'),
-                    subtitle: const Text(
-                        'Shows a general English color name for any selected '
-                        'color'),
-                    value: showColorName,
-                    onChanged: (bool value) =>
-                        setState(() => showColorName = value),
-                  ),
-
-                  SwitchListTile.adaptive(
-                    title: const Text('Show selected color code'),
-                    subtitle: const Text(
-                        'Shows the Flutter style HEX RGB value of the selected '
-                        'color. On the Wheel picker you can enter a value.'),
-                    value: showColorCode,
-                    onChanged: (bool value) =>
-                        setState(() => showColorCode = value),
-                  ),
-
-                  SwitchListTile.adaptive(
-                    title: const Text('Show heading text'),
-                    subtitle: const Text(
-                        'You can provide your own heading widget, if '
-                        'it is null there is no heading'),
-                    value: showHeading,
-                    onChanged: (bool value) =>
-                        setState(() => showHeading = value),
-                  ),
-
-                  SwitchListTile.adaptive(
-                    title: const Text('Show sub heading text'),
-                    subtitle: const Text(
-                        'You can provide your own sub heading widget, if '
-                        'it is null there is no sub heading'),
-                    value: showSubheading,
-                    onChanged: (bool value) =>
-                        setState(() => showSubheading = value),
-                  ),
-
-                  SwitchListTile.adaptive(
-                    title: const Text('Border around color pick items'),
-                    subtitle: const Text('With the API you can also adjust the '
-                        'border color'),
-                    value: hasBorder,
-                    onChanged: (bool value) =>
-                        setState(() => hasBorder = value),
-                  ),
-
-                  SwitchListTile.adaptive(
-                    title: const Text('Border around color wheel'),
-                    subtitle: const Text('With the API you can also adjust the '
-                        'border color'),
-                    value: wheelHasBorder,
-                    onChanged: (bool value) =>
-                        setState(() => wheelHasBorder = value),
-                  ),
-
-                  // Color picker size
-                  ListTile(
-                    title: const Text('Color picker item size'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Slider.adaptive(
-                          min: sizeMin,
-                          max: sizeMax,
-                          divisions: (sizeMax - sizeMin).floor(),
-                          label: size.floor().toString(),
-                          value: size,
-                          onChanged: (double value) {
-                            if (value / 2 < borderRadius) {
-                              borderRadius = value / 2;
                             }
-                            setState(() => size = value);
+                            if (index == 1) {
+                              pEnabled[ColorPickerType.primary] =
+                                  toggleButtonIsSelected[index];
+                              // If we turned on 'primary', we turn of 'Both'
+                              if (pEnabled[ColorPickerType.primary]) {
+                                toggleButtonIsSelected[0] = false;
+                                pEnabled[ColorPickerType.both] = false;
+                              }
+                            }
+                            if (index == 2) {
+                              pEnabled[ColorPickerType.accent] =
+                                  toggleButtonIsSelected[index];
+                              // If we turned on 'accent', we turn of 'Both'
+                              if (pEnabled[ColorPickerType.accent]) {
+                                toggleButtonIsSelected[0] = false;
+                                pEnabled[ColorPickerType.both] = false;
+                              }
+                            }
+                            if (index == 3) {
+                              pEnabled[ColorPickerType.bw] =
+                                  toggleButtonIsSelected[index];
+                            }
+                            if (index == 4) {
+                              pEnabled[ColorPickerType.custom] =
+                                  toggleButtonIsSelected[index];
+                            }
+                            if (index == 5) {
+                              pEnabled[ColorPickerType.wheel] =
+                                  toggleButtonIsSelected[index];
+                            }
+                            setState(() {
+                              // Copy the enabled pickers from the mutated
+                              // copy. If we mutate the pickersEnabled map
+                              // directly the didUpdateWidget will be called,
+                              // but the old and new values will be same
+                              // since we mutated the widget input. Doing it
+                              // this way, the didUpdateWidget function of the
+                              // StatefulWidget sees the changed values of
+                              // pickersEnabled. We need that for dynamically
+                              // changing the enabled pickers correctly.
+                              // Normally you would just define the pickers
+                              // you want when you instantiate it and not
+                              // change it, so you would not need to do this.
+                              pickersEnabled = <ColorPickerType, bool>{
+                                ...pEnabled
+                              };
+                            });
                           },
+                          isSelected: toggleButtonIsSelected,
+                          color: Theme.of(context).colorScheme.primary,
+                          selectedColor:
+                              Theme.of(context).colorScheme.onPrimary,
+                          fillColor: Theme.of(context).colorScheme.secondary,
+                          borderRadius: BorderRadius.circular(4),
+                          borderWidth: 1.5,
+                          borderColor: Theme.of(context).colorScheme.primary,
+                          selectedBorderColor:
+                              Theme.of(context).colorScheme.primary,
+                          hoverColor:
+                              Theme.of(context).colorScheme.secondaryVariant,
+                          children: toggleButtons,
                         ),
-                      ],
-                    ),
-                    trailing: Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          const Text(
-                            'px',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                          Text(
-                            size.floor().toString(),
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ],
                       ),
-                    ),
+                    ],
                   ),
+                ),
 
-                  // Border radius
-                  ListTile(
-                    title: const Text('Color picker item border radius'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Slider.adaptive(
-                          max: size / 2,
-                          divisions: (size / 2).floor(),
-                          label: borderRadius.floor().toString(),
-                          value: borderRadius,
-                          onChanged: (double value) =>
-                              setState(() => borderRadius = value),
-                        ),
-                      ],
-                    ),
-                    trailing: Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          const Text(
-                            'px',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                          Text(
-                            borderRadius.floor().toString(),
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                SwitchListTile.adaptive(
+                  title: const Text('Enable shades selection'),
+                  subtitle:
+                      const Text('If this is off, you can only select the main '
+                          'color in a color swatch'),
+                  value: enableShadesSelection,
+                  onChanged: (bool value) =>
+                      setState(() => enableShadesSelection = value),
+                ),
 
-                  // Elevation of color pick item
-                  ListTile(
-                    title: const Text('Color picker item elevation'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Slider.adaptive(
-                          max: 16,
-                          divisions: 16,
-                          label: elevation.floor().toString(),
-                          value: elevation,
-                          onChanged: (double value) =>
-                              setState(() => elevation = value),
-                        ),
-                      ],
-                    ),
-                    trailing: Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          const Text(
-                            'px',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                          Text(
-                            elevation.floor().toString(),
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                SwitchListTile.adaptive(
+                  title: const Text('Include grey color index 850'),
+                  subtitle: const Text(
+                      'To include the not so well known 850 color in '
+                      'the Grey swatch, turn on this'),
+                  value: includeIndex850,
+                  onChanged: (bool value) =>
+                      setState(() => includeIndex850 = value),
+                ),
 
-                  // Spacing of color pick items
-                  ListTile(
-                    title: const Text('Color picker item spacing'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Slider.adaptive(
-                          max: 25,
-                          divisions: 25,
-                          label: spacing.floor().toString(),
-                          value: spacing,
-                          onChanged: (double value) =>
-                              setState(() => spacing = value),
-                        ),
-                      ],
-                    ),
-                    trailing: Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          const Text(
-                            'px',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                          Text(
-                            spacing.floor().toString(),
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                SwitchListTile.adaptive(
+                  title: const Text('Center content'),
+                  subtitle: const Text('Keep OFF for left aligned'),
+                  value: centerContent,
+                  onChanged: (bool value) =>
+                      setState(() => centerContent = value),
+                ),
 
-                  // Run spacing of color pick items
-                  ListTile(
-                    title: const Text('Color picker item run spacing'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Slider.adaptive(
-                          max: 25,
-                          divisions: 25,
-                          label: runSpacing.floor().toString(),
-                          value: runSpacing,
-                          onChanged: (double value) =>
-                              setState(() => runSpacing = value),
-                        ),
-                      ],
-                    ),
-                    trailing: Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          const Text(
-                            'px',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                          Text(
-                            runSpacing.floor().toString(),
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                SwitchListTile.adaptive(
+                  title: const Text('Show selected material color name'),
+                  subtitle: const Text(
+                      'If the color has a Material name, it is shown along '
+                      'with its shade index'),
+                  value: showMaterialName,
+                  onChanged: (bool value) =>
+                      setState(() => showMaterialName = value),
+                ),
 
-                  // Run spacing of color pick items
-                  ListTile(
-                    title: const Text('Color picker content padding'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Slider.adaptive(
-                          max: 40,
-                          divisions: 40,
-                          label: padding.floor().toString(),
-                          value: padding,
-                          onChanged: (double value) =>
-                              setState(() => padding = value),
-                        ),
-                      ],
-                    ),
-                    trailing: Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          const Text(
-                            'px',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                          Text(
-                            padding.floor().toString(),
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                SwitchListTile.adaptive(
+                  title: const Text('Show selected color name'),
+                  subtitle: const Text(
+                      'Shows a general English color name for any selected '
+                      'color'),
+                  value: showColorName,
+                  onChanged: (bool value) =>
+                      setState(() => showColorName = value),
+                ),
 
-                  // Wheel size selector
-                  ListTile(
-                    title: const Text('Color wheel size'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Slider.adaptive(
-                          min: 150,
-                          max: 500,
-                          divisions: 40,
-                          label: wheelDiameter.floor().toString(),
-                          value: wheelDiameter,
-                          onChanged: (double value) =>
-                              setState(() => wheelDiameter = value),
-                        ),
-                      ],
-                    ),
-                    trailing: Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          const Text(
-                            'px',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                          Text(
-                            wheelDiameter.floor().toString(),
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                SwitchListTile.adaptive(
+                  title: const Text('Show selected color code'),
+                  subtitle: const Text(
+                      'Shows the Flutter style HEX RGB value of the selected '
+                      'color. On the Wheel picker you can enter a value.'),
+                  value: showColorCode,
+                  onChanged: (bool value) =>
+                      setState(() => showColorCode = value),
+                ),
 
-                  // Wheel width selector
-                  ListTile(
-                    title: const Text('Color wheel width'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                SwitchListTile.adaptive(
+                  title: const Text('Show heading text'),
+                  subtitle:
+                      const Text('You can provide your own heading widget, if '
+                          'it is null there is no heading'),
+                  value: showHeading,
+                  onChanged: (bool value) =>
+                      setState(() => showHeading = value),
+                ),
+
+                SwitchListTile.adaptive(
+                  title: const Text('Show sub heading text'),
+                  subtitle: const Text(
+                      'You can provide your own sub heading widget, if '
+                      'it is null there is no sub heading'),
+                  value: showSubheading,
+                  onChanged: (bool value) =>
+                      setState(() => showSubheading = value),
+                ),
+
+                SwitchListTile.adaptive(
+                  title: const Text('Border around color pick items'),
+                  subtitle: const Text('With the API you can also adjust the '
+                      'border color'),
+                  value: hasBorder,
+                  onChanged: (bool value) => setState(() => hasBorder = value),
+                ),
+
+                SwitchListTile.adaptive(
+                  title: const Text('Border around color wheel'),
+                  subtitle: const Text('With the API you can also adjust the '
+                      'border color'),
+                  value: wheelHasBorder,
+                  onChanged: (bool value) =>
+                      setState(() => wheelHasBorder = value),
+                ),
+
+                // Color picker size
+                ListTile(
+                  title: const Text('Color picker item size'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Slider.adaptive(
+                        min: sizeMin,
+                        max: sizeMax,
+                        divisions: (sizeMax - sizeMin).floor(),
+                        label: size.floor().toString(),
+                        value: size,
+                        onChanged: (double value) {
+                          if (value / 2 < borderRadius) {
+                            borderRadius = value / 2;
+                          }
+                          setState(() => size = value);
+                        },
+                      ),
+                    ],
+                  ),
+                  trailing: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
-                        Slider.adaptive(
-                          min: 4,
-                          max: 50,
-                          label: wheelWidth.floor().toString(),
-                          value: wheelWidth,
-                          onChanged: (double value) =>
-                              setState(() => wheelWidth = value),
+                        const Text(
+                          'px',
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        Text(
+                          size.floor().toString(),
+                          style: const TextStyle(fontSize: 15),
                         ),
                       ],
                     ),
-                    trailing: Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          const Text(
-                            'px',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                          Text(
-                            wheelWidth.floor().toString(),
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ],
+                  ),
+                ),
+
+                // Border radius
+                ListTile(
+                  title: const Text('Color picker item border radius'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Slider.adaptive(
+                        max: size / 2,
+                        divisions: (size / 2).floor(),
+                        label: borderRadius.floor().toString(),
+                        value: borderRadius,
+                        onChanged: (double value) =>
+                            setState(() => borderRadius = value),
                       ),
+                    ],
+                  ),
+                  trailing: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        const Text(
+                          'px',
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        Text(
+                          borderRadius.floor().toString(),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+
+                // Elevation of color pick item
+                ListTile(
+                  title: const Text('Color picker item elevation'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Slider.adaptive(
+                        max: 16,
+                        divisions: 16,
+                        label: elevation.floor().toString(),
+                        value: elevation,
+                        onChanged: (double value) =>
+                            setState(() => elevation = value),
+                      ),
+                    ],
+                  ),
+                  trailing: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        const Text(
+                          'px',
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        Text(
+                          elevation.floor().toString(),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Spacing of color pick items
+                ListTile(
+                  title: const Text('Color picker item spacing'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Slider.adaptive(
+                        max: 25,
+                        divisions: 25,
+                        label: spacing.floor().toString(),
+                        value: spacing,
+                        onChanged: (double value) =>
+                            setState(() => spacing = value),
+                      ),
+                    ],
+                  ),
+                  trailing: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        const Text(
+                          'px',
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        Text(
+                          spacing.floor().toString(),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Run spacing of color pick items
+                ListTile(
+                  title: const Text('Color picker item run spacing'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Slider.adaptive(
+                        max: 25,
+                        divisions: 25,
+                        label: runSpacing.floor().toString(),
+                        value: runSpacing,
+                        onChanged: (double value) =>
+                            setState(() => runSpacing = value),
+                      ),
+                    ],
+                  ),
+                  trailing: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        const Text(
+                          'px',
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        Text(
+                          runSpacing.floor().toString(),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Run spacing of color pick items
+                ListTile(
+                  title: const Text('Color picker content padding'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Slider.adaptive(
+                        max: 40,
+                        divisions: 40,
+                        label: padding.floor().toString(),
+                        value: padding,
+                        onChanged: (double value) =>
+                            setState(() => padding = value),
+                      ),
+                    ],
+                  ),
+                  trailing: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        const Text(
+                          'px',
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        Text(
+                          padding.floor().toString(),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Wheel size selector
+                ListTile(
+                  title: const Text('Color wheel size'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Slider.adaptive(
+                        min: 150,
+                        max: 500,
+                        divisions: 40,
+                        label: wheelDiameter.floor().toString(),
+                        value: wheelDiameter,
+                        onChanged: (double value) =>
+                            setState(() => wheelDiameter = value),
+                      ),
+                    ],
+                  ),
+                  trailing: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        const Text(
+                          'px',
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        Text(
+                          wheelDiameter.floor().toString(),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Wheel width selector
+                ListTile(
+                  title: const Text('Color wheel width'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Slider.adaptive(
+                        min: 4,
+                        max: 50,
+                        label: wheelWidth.floor().toString(),
+                        value: wheelWidth,
+                        onChanged: (double value) =>
+                            setState(() => wheelWidth = value),
+                      ),
+                    ],
+                  ),
+                  trailing: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        const Text(
+                          'px',
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        Text(
+                          wheelWidth.floor().toString(),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -942,22 +984,22 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
       color: dialogPickerColor,
       onColorChanged: (Color color) =>
           setState(() => dialogPickerColor = color),
-      enableShadesSelection: enableShadesSelection,
-      includeIndex850: includeIndex850,
-      showMaterialName: showMaterialName,
-      showColorName: showColorName,
-      showColorCode: showColorCode,
       crossAxisAlignment:
           centerContent ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      padding: EdgeInsets.all(padding),
+      enableShadesSelection: enableShadesSelection,
+      includeIndex850: includeIndex850,
       width: size,
       height: size,
-      borderRadius: borderRadius,
-      hasBorder: hasBorder,
-      wheelHasBorder: wheelHasBorder,
-      elevation: elevation,
-      padding: EdgeInsets.all(padding),
       spacing: spacing,
       runSpacing: runSpacing,
+      elevation: elevation,
+      hasBorder: hasBorder,
+      borderRadius: borderRadius,
+      wheelDiameter: wheelDiameter,
+      wheelWidth: wheelWidth,
+      wheelHasBorder: wheelHasBorder,
+      pickersEnabled: pickersEnabled,
       heading: showHeading
           ? Text(
               'Select color',
@@ -976,10 +1018,11 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
               style: Theme.of(context).textTheme.subtitle1,
             )
           : null,
-      pickersEnabled: pickersEnabled,
+      showMaterialName: showMaterialName,
+      showColorName: showColorName,
+      showColorCode: showColorCode,
+      // The name map is used to give the custom colors names
       customColorSwatchesAndNames: colorsNameMap,
-      wheelDiameter: wheelDiameter,
-      wheelWidth: wheelWidth,
     ).showPickerDialog(
       context,
       constraints:

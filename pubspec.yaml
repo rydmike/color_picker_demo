@@ -1,14 +1,14 @@
 name: color_picker_demo
 description: Web and desktop demo of the ColorPicker package
 version: 1.0.0
-author: Mike Rydstrom
+publish_to: none
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   # Color picker component (by Mike Rydstrom, rydmike.com).
-  flex_color_picker: ^1.0.0-dev.5
+  flex_color_picker: ^1.0.0
 
   flutter:
     sdk: flutter
