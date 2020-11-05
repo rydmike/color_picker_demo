@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flex_color_picker/color_picker.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
 
 // Just a simple way to leave a trace of what version you built a Flutter
 // Web demo with inside the app. You can also show it in the demo,
 // like in this example, so people testing it don't have to ask.
-const String kFlutterVersion = 'master, 1.24.0-6.0.pre';
+const String kFlutterVersion = 'master, 1.24.0-8.0.pre.91';
 
 // Max width of the body content when used on a wide screen.
 const double kMaxBodyWidth = 700;
@@ -200,7 +200,9 @@ class ColorPickerPage extends StatefulWidget {
 
 class _ColorPickerPageState extends State<ColorPickerPage> {
   bool enableShadesSelection = true;
-  bool showColorNameCode = true;
+  bool showMaterialName = true;
+  bool showColorName = true;
+  bool showColorCode = true;
   bool hasBorder = false;
   bool wheelHasBorder = false;
   bool centerContent = true;
@@ -270,12 +272,12 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
   final List<bool> toggleButtonIsSelected = pickersEnabled.values.toList();
 
   // Define some custom colors to be used in the custom segment.
-  static const Color googleNewPrimary = Color(0xFF6200EE);
-  static const Color googleNewPrimaryVariant = Color(0xFF3700B3);
-  static const Color googleNewSecondary = Color(0xFF03DAC6);
-  static const Color googleNewSecondaryVariant = Color(0xFF018786);
-  static const Color googleNewError = Color(0xFFB00020);
-  static const Color googleNewErrorDark = Color(0xFFCF6679);
+  static const Color guideNewPrimary = Color(0xFF6200EE);
+  static const Color guideNewPrimaryVariant = Color(0xFF3700B3);
+  static const Color guideNewSecondary = Color(0xFF03DAC6);
+  static const Color guideNewSecondaryVariant = Color(0xFF018786);
+  static const Color guideNewError = Color(0xFFB00020);
+  static const Color guideNewErrorDark = Color(0xFFCF6679);
   static const Color blueBlues = Color(0xFF174378);
   static const Color clearBlue = Color(0xFF3db5e0);
   static const Color darkPink = Color(0xFFa33e94);
@@ -291,12 +293,14 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
   // Make a custom color swatch to name map from the above custom colors.
   final Map<ColorSwatch<Object>, String> colorsNameMap =
       <ColorSwatch<Object>, String>{
-    ColorTools.createPrimaryColor(googleNewPrimary): 'G Purple',
-    ColorTools.createPrimaryColor(googleNewPrimaryVariant): 'G Purple Variant',
-    ColorTools.createAccentColor(googleNewSecondary): 'G Teal',
-    ColorTools.createAccentColor(googleNewSecondaryVariant): 'G Teal Variant',
-    ColorTools.createPrimaryColor(googleNewError): 'G Error',
-    ColorTools.createPrimaryColor(googleNewErrorDark): 'G Error Dark',
+    ColorTools.createPrimaryColor(guideNewPrimary): 'Guide Purple',
+    ColorTools.createPrimaryColor(guideNewPrimaryVariant):
+        'Guide Purple Variant',
+    ColorTools.createAccentColor(guideNewSecondary): 'Guide Teal',
+    ColorTools.createAccentColor(guideNewSecondaryVariant):
+        'Guide Teal Variant',
+    ColorTools.createPrimaryColor(guideNewError): 'Guide Error',
+    ColorTools.createPrimaryColor(guideNewErrorDark): 'Guide Error Dark',
     ColorTools.createPrimaryColor(blueBlues): 'Blue blues',
     ColorTools.createPrimaryColor(clearBlue): 'Clear blue',
     ColorTools.createPrimaryColor(darkPink): 'Dark pink',
@@ -362,7 +366,9 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                               setState(() => screenPickerColor = color),
                           enableShadesSelection: enableShadesSelection,
                           includeIndex850: includeIndex850,
-                          showColorNameCode: showColorNameCode,
+                          showMaterialName: showMaterialName,
+                          showColorName: showColorName,
+                          showColorCode: showColorCode,
                           crossAxisAlignment: centerContent
                               ? CrossAxisAlignment.center
                               : CrossAxisAlignment.start,
@@ -408,11 +414,8 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                     title:
                         const Text('Select color above to change this color'),
                     subtitle: Text(
-                      ColorTools.colorNameAndHexCode(
-                        screenPickerColor,
-                        colorSwatchNameMap: colorsNameMap,
-                      ),
-                    ),
+                        '${ColorTools.colorNameAndHexCode(screenPickerColor, colorSwatchNameMap: colorsNameMap)} '
+                        'aka ${ColorTools.nameThatColor(screenPickerColor)}'),
                     trailing: ColorIndicator(
                       height: size,
                       width: size,
@@ -428,10 +431,8 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                     title:
                         const Text('Click this color to change it in a dialog'),
                     subtitle: Text(
-                      ColorTools.colorNameAndHexCode(
-                        dialogPickerColor,
-                        colorSwatchNameMap: colorsNameMap,
-                      ),
+                      '${ColorTools.colorNameAndHexCode(dialogPickerColor, colorSwatchNameMap: colorsNameMap)} '
+                      'aka ${ColorTools.nameThatColor(dialogPickerColor)}',
                     ),
                     trailing: ColorIndicator(
                       height: size,
@@ -583,13 +584,33 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                   ),
 
                   SwitchListTile.adaptive(
-                    title: const Text('Show selected color name and code'),
+                    title: const Text('Show selected material color name'),
                     subtitle: const Text(
-                        'If color has a material name it is shown along '
-                        'with shade index and Flutter HEX code'),
-                    value: showColorNameCode,
+                        'If the color has a Material name, it is shown along '
+                        'with its shade index'),
+                    value: showMaterialName,
                     onChanged: (bool value) =>
-                        setState(() => showColorNameCode = value),
+                        setState(() => showMaterialName = value),
+                  ),
+
+                  SwitchListTile.adaptive(
+                    title: const Text('Show selected color name'),
+                    subtitle: const Text(
+                        'Shows a general English color name for any selected '
+                        'color'),
+                    value: showColorName,
+                    onChanged: (bool value) =>
+                        setState(() => showColorName = value),
+                  ),
+
+                  SwitchListTile.adaptive(
+                    title: const Text('Show selected color code'),
+                    subtitle: const Text(
+                        'Shows the Flutter style HEX RGB value of the selected '
+                        'color. On the Wheel picker you can enter a value.'),
+                    value: showColorCode,
+                    onChanged: (bool value) =>
+                        setState(() => showColorCode = value),
                   ),
 
                   SwitchListTile.adaptive(
@@ -923,7 +944,9 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
           setState(() => dialogPickerColor = color),
       enableShadesSelection: enableShadesSelection,
       includeIndex850: includeIndex850,
-      showColorNameCode: showColorNameCode,
+      showMaterialName: showMaterialName,
+      showColorName: showColorName,
+      showColorCode: showColorCode,
       crossAxisAlignment:
           centerContent ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       width: size,
