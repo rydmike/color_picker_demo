@@ -6,6 +6,7 @@ import 'package:flex_color_picker/flex_color_picker.dart';
 // Web demo with inside the app. You can also show it in the demo,
 // like in this example, so people testing it don't have to ask.
 const String kFlutterVersion = 'master 1.24.0-8.0.pre.97';
+const String kColorPickerVersion = '1.1.0';
 
 // Max width of the body content when used on a wide screen.
 const double kMaxBodyWidth = 700;
@@ -125,16 +126,16 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(height: MediaQuery.of(context).padding.top),
           const Spacer(),
           Text(
-            'COLOR PICKER',
-            style: Theme.of(context).textTheme.headline5,
+            'ColorPicker',
+            style: Theme.of(context).textTheme.headline3,
           ),
           const SizedBox(height: 30),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               ColorIndicator(
-                height: 60,
-                width: 60,
+                height: 65,
+                width: 65,
                 borderRadius: 8,
                 elevation: 4,
                 color: Colors.blueAccent[200],
@@ -142,15 +143,15 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(width: 16),
               ColorIndicator(
-                height: 60,
-                width: 60,
+                height: 65,
+                width: 65,
                 color: Colors.blue[100],
                 hasBorder: true,
               ),
               const SizedBox(width: 16),
               ColorIndicator(
-                height: 60,
-                width: 60,
+                height: 65,
+                width: 65,
                 borderRadius: 30,
                 elevation: 8,
                 color: Colors.indigo[600],
@@ -162,24 +163,24 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               ColorIndicator(
-                height: 60,
-                width: 60,
+                height: 65,
+                width: 65,
                 borderRadius: 30,
                 elevation: 9,
                 color: Colors.red[800],
               ),
               const SizedBox(width: 16),
               ColorIndicator(
-                height: 60,
-                width: 60,
+                height: 65,
+                width: 65,
                 borderRadius: 0,
                 color: Colors.redAccent[100],
                 hasBorder: true,
               ),
               const SizedBox(width: 16),
               ColorIndicator(
-                height: 60,
-                width: 60,
+                height: 65,
+                width: 65,
                 borderRadius: 16,
                 elevation: 5,
                 color: Colors.pink[800],
@@ -192,16 +193,16 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               ColorIndicator(
-                height: 60,
-                width: 60,
+                height: 65,
+                width: 65,
                 borderRadius: 4,
                 elevation: 1,
                 color: Colors.amber[400],
               ),
               const SizedBox(width: 16),
               ColorIndicator(
-                height: 60,
-                width: 60,
+                height: 65,
+                width: 65,
                 borderRadius: 30,
                 elevation: 1,
                 color: Colors.orange[300],
@@ -209,11 +210,28 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(width: 16),
               ColorIndicator(
-                height: 60,
-                width: 60,
+                height: 65,
+                width: 65,
                 color: Colors.amber[800],
               ),
             ],
+          ),
+          const SizedBox(height: 40),
+          OutlinedButton(
+            onPressed: () {
+              Navigator.push<Object>(
+                context,
+                MaterialPageRoute<Object>(
+                    builder: (BuildContext context) => const ColorPickerPage()),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                'Try the ColorPicker',
+                style: Theme.of(context).textTheme.headline6,
+              ),
+            ),
           ),
           const SizedBox(height: 20),
           // Theme mode toggle
@@ -231,24 +249,12 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ),
-          const SizedBox(height: 40),
-          OutlinedButton(
-            onPressed: () {
-              Navigator.push<Object>(
-                context,
-                MaterialPageRoute<Object>(
-                    builder: (BuildContext context) => const ColorPickerPage()),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                'Try the color picker ',
-                style: Theme.of(context).textTheme.subtitle1,
-              ),
-            ),
-          ),
+
           const Spacer(),
+          Text(
+            'Using flex_color_picker version $kColorPickerVersion',
+            style: Theme.of(context).textTheme.caption,
+          ),
           Text(
             'Built with Flutter $kFlutterVersion',
             style: Theme.of(context).textTheme.caption,
@@ -272,6 +278,7 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
   bool showMaterialName = true;
   bool showColorName = true;
   bool showColorCode = true;
+  bool showColorValue = false;
   bool hasBorder = false;
   bool wheelHasBorder = false;
   bool centerContent = true;
@@ -289,6 +296,7 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
   double spacing = 4;
   double runSpacing = 4;
   double padding = 10;
+  double columnSpacing = 8;
   double wheelDiameter = 190;
   double wheelWidth = 16;
 
@@ -393,79 +401,8 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                 SizedBox(
                     height:
                         MediaQuery.of(context).padding.top + kToolbarHeight),
-                // Color picker demo in a raised card
-                SizedBox(
-                  width: double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Card(
-                      elevation: 2,
-                      child: ColorPicker(
-                        color: screenPickerColor,
-                        onColorChanged: (Color color) =>
-                            setState(() => screenPickerColor = color),
-                        crossAxisAlignment: centerContent
-                            ? CrossAxisAlignment.center
-                            : CrossAxisAlignment.start,
-                        padding: EdgeInsets.all(padding),
-                        enableShadesSelection: enableShadesSelection,
-                        includeIndex850: includeIndex850,
-                        width: size,
-                        height: size,
-                        spacing: spacing,
-                        runSpacing: runSpacing,
-                        elevation: elevation,
-                        hasBorder: hasBorder,
-                        borderRadius: borderRadius,
-                        wheelDiameter: wheelDiameter,
-                        wheelWidth: wheelWidth,
-                        wheelHasBorder: wheelHasBorder,
-                        pickersEnabled: pickersEnabled,
-                        heading: showHeading
-                            ? Text(
-                                'Select color',
-                                style: Theme.of(context).textTheme.subtitle1,
-                              )
-                            : null,
-                        subheading: showSubheading
-                            ? Text(
-                                'Select color shade',
-                                style: Theme.of(context).textTheme.subtitle1,
-                              )
-                            : null,
-                        wheelSubheading: showSubheading
-                            ? Text(
-                                'Selected color and its material shades',
-                                style: Theme.of(context).textTheme.subtitle1,
-                              )
-                            : null,
-                        showMaterialName: showMaterialName,
-                        showColorName: showColorName,
-                        showColorCode: showColorCode,
-                        // The name map is used to give the custom colors names
-                        customColorSwatchesAndNames: colorsNameMap,
-                      ),
-                    ),
-                  ),
-                ),
 
-                // Show the selected color
-                ListTile(
-                  title: const Text('Select color above to change this color'),
-                  subtitle: Text(
-                      '${ColorTools.materialNameAndCode(screenPickerColor, colorSwatchNameMap: colorsNameMap)} '
-                      'aka ${ColorTools.nameThatColor(screenPickerColor)}'),
-                  trailing: ColorIndicator(
-                    height: size,
-                    width: size,
-                    borderRadius: borderRadius,
-                    elevation: elevation,
-                    color: screenPickerColor,
-                    hasBorder: hasBorder,
-                  ),
-                ),
-
-                // Show the selected color
+                // Show the selected color in a dialog
                 ListTile(
                   title:
                       const Text('Click this color to change it in a dialog'),
@@ -491,13 +428,85 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                   ),
                 ),
 
-                const Divider(),
+                // Show the color selected in the picker below
+                ListTile(
+                  title: const Text('Select color below to change this color'),
+                  subtitle: Text(
+                      '${ColorTools.materialNameAndCode(screenPickerColor, colorSwatchNameMap: colorsNameMap)} '
+                      'aka ${ColorTools.nameThatColor(screenPickerColor)}'),
+                  trailing: ColorIndicator(
+                    height: size,
+                    width: size,
+                    borderRadius: borderRadius,
+                    elevation: elevation,
+                    color: screenPickerColor,
+                    hasBorder: hasBorder,
+                  ),
+                ),
+
+                // Color picker demo in a raised card
+                SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Card(
+                      elevation: 4,
+                      child: ColorPicker(
+                        color: screenPickerColor,
+                        onColorChanged: (Color color) =>
+                            setState(() => screenPickerColor = color),
+                        crossAxisAlignment: centerContent
+                            ? CrossAxisAlignment.center
+                            : CrossAxisAlignment.start,
+                        padding: EdgeInsets.all(padding),
+                        enableShadesSelection: enableShadesSelection,
+                        includeIndex850: includeIndex850,
+                        width: size,
+                        height: size,
+                        spacing: spacing,
+                        runSpacing: runSpacing,
+                        elevation: elevation,
+                        hasBorder: hasBorder,
+                        borderRadius: borderRadius,
+                        columnSpacing: columnSpacing,
+                        wheelDiameter: wheelDiameter,
+                        wheelWidth: wheelWidth,
+                        wheelHasBorder: wheelHasBorder,
+                        pickersEnabled: pickersEnabled,
+                        heading: showHeading
+                            ? Text(
+                                'Select color',
+                                style: Theme.of(context).textTheme.headline5,
+                              )
+                            : null,
+                        subheading: showSubheading
+                            ? Text(
+                                'Select color shade',
+                                style: Theme.of(context).textTheme.subtitle1,
+                              )
+                            : null,
+                        wheelSubheading: showSubheading
+                            ? Text(
+                                'Selected color and its color swatch',
+                                style: Theme.of(context).textTheme.subtitle1,
+                              )
+                            : null,
+                        showMaterialName: showMaterialName,
+                        showColorName: showColorName,
+                        showColorCode: showColorCode,
+                        showColorValue: showColorValue,
+                        // The name map is used to give the custom colors names
+                        customColorSwatchesAndNames: colorsNameMap,
+                      ),
+                    ),
+                  ),
+                ),
 
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 0, 14),
                   child: Text(
                     'Customize the Color Picker',
-                    style: Theme.of(context).textTheme.headline6,
+                    style: Theme.of(context).textTheme.headline4,
                   ),
                 ),
 
@@ -602,97 +611,14 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                 SwitchListTile.adaptive(
                   title: const Text('Enable shades selection'),
                   subtitle:
-                      const Text('If this is off, you can only select the main '
-                          'color in a color swatch'),
+                      const Text('Turn OFF to only be able to select the main '
+                          'color in a color swatch.'),
                   value: enableShadesSelection,
                   onChanged: (bool value) =>
                       setState(() => enableShadesSelection = value),
                 ),
 
-                SwitchListTile.adaptive(
-                  title: const Text('Include grey color index 850'),
-                  subtitle: const Text(
-                      'To include the not so well known 850 color in '
-                      'the Grey swatch, turn on this'),
-                  value: includeIndex850,
-                  onChanged: (bool value) =>
-                      setState(() => includeIndex850 = value),
-                ),
-
-                SwitchListTile.adaptive(
-                  title: const Text('Center content'),
-                  subtitle: const Text('Keep OFF for left aligned'),
-                  value: centerContent,
-                  onChanged: (bool value) =>
-                      setState(() => centerContent = value),
-                ),
-
-                SwitchListTile.adaptive(
-                  title: const Text('Show selected material color name'),
-                  subtitle: const Text(
-                      'If the color has a Material name, it is shown along '
-                      'with its shade index'),
-                  value: showMaterialName,
-                  onChanged: (bool value) =>
-                      setState(() => showMaterialName = value),
-                ),
-
-                SwitchListTile.adaptive(
-                  title: const Text('Show selected color name'),
-                  subtitle: const Text(
-                      'Shows a general English color name for any selected '
-                      'color'),
-                  value: showColorName,
-                  onChanged: (bool value) =>
-                      setState(() => showColorName = value),
-                ),
-
-                SwitchListTile.adaptive(
-                  title: const Text('Show selected color code'),
-                  subtitle: const Text(
-                      'Shows the Flutter style HEX RGB value of the selected '
-                      'color. On the Wheel picker you can enter a value.'),
-                  value: showColorCode,
-                  onChanged: (bool value) =>
-                      setState(() => showColorCode = value),
-                ),
-
-                SwitchListTile.adaptive(
-                  title: const Text('Show heading text'),
-                  subtitle:
-                      const Text('You can provide your own heading widget, if '
-                          'it is null there is no heading'),
-                  value: showHeading,
-                  onChanged: (bool value) =>
-                      setState(() => showHeading = value),
-                ),
-
-                SwitchListTile.adaptive(
-                  title: const Text('Show sub heading text'),
-                  subtitle: const Text(
-                      'You can provide your own sub heading widget, if '
-                      'it is null there is no sub heading'),
-                  value: showSubheading,
-                  onChanged: (bool value) =>
-                      setState(() => showSubheading = value),
-                ),
-
-                SwitchListTile.adaptive(
-                  title: const Text('Border around color pick items'),
-                  subtitle: const Text('With the API you can also adjust the '
-                      'border color'),
-                  value: hasBorder,
-                  onChanged: (bool value) => setState(() => hasBorder = value),
-                ),
-
-                SwitchListTile.adaptive(
-                  title: const Text('Border around color wheel'),
-                  subtitle: const Text('With the API you can also adjust the '
-                      'border color'),
-                  value: wheelHasBorder,
-                  onChanged: (bool value) =>
-                      setState(() => wheelHasBorder = value),
-                ),
+                const Divider(),
 
                 // Color picker size
                 ListTile(
@@ -755,45 +681,11 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
                         const Text(
-                          'px',
+                          'dp',
                           style: TextStyle(fontSize: 11),
                         ),
                         Text(
                           borderRadius.floor().toString(),
-                          style: const TextStyle(fontSize: 15),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Elevation of color pick item
-                ListTile(
-                  title: const Text('Color picker item elevation'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Slider.adaptive(
-                        max: 16,
-                        divisions: 16,
-                        label: elevation.floor().toString(),
-                        value: elevation,
-                        onChanged: (double value) =>
-                            setState(() => elevation = value),
-                      ),
-                    ],
-                  ),
-                  trailing: Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        const Text(
-                          'px',
-                          style: TextStyle(fontSize: 11),
-                        ),
-                        Text(
-                          elevation.floor().toString(),
                           style: const TextStyle(fontSize: 15),
                         ),
                       ],
@@ -823,7 +715,7 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
                         const Text(
-                          'px',
+                          'dp',
                           style: TextStyle(fontSize: 11),
                         ),
                         Text(
@@ -857,7 +749,7 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
                         const Text(
-                          'px',
+                          'dp',
                           style: TextStyle(fontSize: 11),
                         ),
                         Text(
@@ -869,19 +761,19 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                   ),
                 ),
 
-                // Run spacing of color pick items
+                // Elevation of color pick item
                 ListTile(
-                  title: const Text('Color picker content padding'),
+                  title: const Text('Color picker item elevation'),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Slider.adaptive(
-                        max: 40,
-                        divisions: 40,
-                        label: padding.floor().toString(),
-                        value: padding,
+                        max: 16,
+                        divisions: 16,
+                        label: elevation.floor().toString(),
+                        value: elevation,
                         onChanged: (double value) =>
-                            setState(() => padding = value),
+                            setState(() => elevation = value),
                       ),
                     ],
                   ),
@@ -891,16 +783,100 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
                         const Text(
-                          'px',
+                          'dp',
                           style: TextStyle(fontSize: 11),
                         ),
                         Text(
-                          padding.floor().toString(),
+                          elevation.floor().toString(),
                           style: const TextStyle(fontSize: 15),
                         ),
                       ],
                     ),
                   ),
+                ),
+
+                const Divider(),
+
+                SwitchListTile.adaptive(
+                  title: const Text('Show Material color name'),
+                  subtitle: const Text(
+                      'If the color has a Material name, it is shown along '
+                      'with its shade index.'),
+                  value: showMaterialName,
+                  onChanged: (bool value) =>
+                      setState(() => showMaterialName = value),
+                ),
+
+                SwitchListTile.adaptive(
+                  title: const Text('Show color name'),
+                  subtitle: const Text(
+                      'Shows a general English color name for any selected '
+                      'color.'),
+                  value: showColorName,
+                  onChanged: (bool value) =>
+                      setState(() => showColorName = value),
+                ),
+
+                SwitchListTile.adaptive(
+                  title: const Text('Show selected color code'),
+                  subtitle: const Text(
+                      'Show the Flutter style HEX RGB value of the selected '
+                      'color. On the wheel picker you can also enter a HEX '
+                      'RGB value.'),
+                  value: showColorCode,
+                  onChanged: (bool value) =>
+                      setState(() => showColorCode = value),
+                ),
+
+                SwitchListTile.adaptive(
+                  title: const Text('Show integer color value'),
+                  subtitle: const Text(
+                      'Show the integer value of the selected color. The value '
+                      'can be selected and copied.'),
+                  value: showColorValue,
+                  onChanged: (bool value) =>
+                      setState(() => showColorValue = value),
+                ),
+
+                const Divider(),
+
+                SwitchListTile.adaptive(
+                  title: const Text('Show heading text'),
+                  subtitle:
+                      const Text('You can provide your own heading widget, if '
+                          'it is null there is no heading.'),
+                  value: showHeading,
+                  onChanged: (bool value) =>
+                      setState(() => showHeading = value),
+                ),
+
+                SwitchListTile.adaptive(
+                  title: const Text('Show subheading text'),
+                  subtitle: const Text(
+                      'You can provide your own subheading widget, if '
+                      'it is null there is no sub heading.'),
+                  value: showSubheading,
+                  onChanged: (bool value) =>
+                      setState(() => showSubheading = value),
+                ),
+
+                SwitchListTile.adaptive(
+                  title: const Text('Border around color pick items'),
+                  subtitle: const Text('With the API you can also adjust the '
+                      'border color.'),
+                  value: hasBorder,
+                  onChanged: (bool value) => setState(() => hasBorder = value),
+                ),
+
+                const Divider(),
+
+                SwitchListTile.adaptive(
+                  title: const Text('Border around color wheel'),
+                  subtitle: const Text('With the API you can also adjust the '
+                      'border color'),
+                  value: wheelHasBorder,
+                  onChanged: (bool value) =>
+                      setState(() => wheelHasBorder = value),
                 ),
 
                 // Wheel size selector
@@ -971,6 +947,94 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                     ),
                   ),
                 ),
+
+                const Divider(),
+
+                SwitchListTile.adaptive(
+                  title: const Text('Include grey color index 850'),
+                  subtitle: const Text(
+                      'To include the not so well known 850 color in '
+                      'the Grey swatch, turn this ON.'),
+                  value: includeIndex850,
+                  onChanged: (bool value) =>
+                      setState(() => includeIndex850 = value),
+                ),
+
+                SwitchListTile.adaptive(
+                  title: const Text('Center content'),
+                  subtitle: const Text('Keep OFF for left aligned.'),
+                  value: centerContent,
+                  onChanged: (bool value) =>
+                      setState(() => centerContent = value),
+                ),
+
+                // Vertical space between items in the color picker
+                ListTile(
+                  title: const Text('Color picker row space'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Slider.adaptive(
+                        max: 40,
+                        divisions: 40,
+                        label: columnSpacing.floor().toString(),
+                        value: columnSpacing,
+                        onChanged: (double value) =>
+                            setState(() => columnSpacing = value),
+                      ),
+                    ],
+                  ),
+                  trailing: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        const Text(
+                          'dp',
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        Text(
+                          columnSpacing.floor().toString(),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Padding around all the content in the picker
+                ListTile(
+                  title: const Text('Color picker content padding'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Slider.adaptive(
+                        max: 40,
+                        divisions: 40,
+                        label: padding.floor().toString(),
+                        value: padding,
+                        onChanged: (double value) =>
+                            setState(() => padding = value),
+                      ),
+                    ],
+                  ),
+                  trailing: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        const Text(
+                          'dp',
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        Text(
+                          padding.floor().toString(),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -996,6 +1060,7 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
       elevation: elevation,
       hasBorder: hasBorder,
       borderRadius: borderRadius,
+      columnSpacing: columnSpacing,
       wheelDiameter: wheelDiameter,
       wheelWidth: wheelWidth,
       wheelHasBorder: wheelHasBorder,
@@ -1003,7 +1068,7 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
       heading: showHeading
           ? Text(
               'Select color',
-              style: Theme.of(context).textTheme.subtitle1,
+              style: Theme.of(context).textTheme.headline5,
             )
           : null,
       subheading: showSubheading
@@ -1014,13 +1079,14 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
           : null,
       wheelSubheading: showSubheading
           ? Text(
-              'Selected color and its material shades',
+              'Selected color and its color swatch',
               style: Theme.of(context).textTheme.subtitle1,
             )
           : null,
       showMaterialName: showMaterialName,
       showColorName: showColorName,
       showColorCode: showColorCode,
+      showColorValue: showColorValue,
       // The name map is used to give the custom colors names
       customColorSwatchesAndNames: colorsNameMap,
     ).showPickerDialog(
