@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   # Color picker component (by Mike Rydstrom, rydmike.com).
-  flex_color_picker: ^1.1.0
+  flex_color_picker: ^1.1.2
 
   flutter:
     sdk: flutter
