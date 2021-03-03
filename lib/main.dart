@@ -5,8 +5,8 @@ import 'package:flex_color_picker/flex_color_picker.dart';
 // Just a simple way to leave a trace of what version you built a Flutter
 // Web demo with inside the app. You can also show it in the demo,
 // like in this example, so people testing it don't have to ask.
-const String kFlutterVersion = 'master 1.25.0-5.0.pre.68';
-const String kColorPickerVersion = '1.1.2';
+const String kFlutterVersion = 'Channel dev, 1.27.0-8.0.pre (SKIA)';
+const String kColorPickerVersion = '1.1.5';
 
 // Max width of the body content when used on a wide screen.
 const double kMaxBodyWidth = 700;
